@@ -11,7 +11,7 @@ class Cache():
         self._redis = redis.Redis()
         self. _redis.flushdb()
 
-    def store(self, data: Unions[int, float, bytes, str]) -> str:
+    def store(self, data: Union[int, float, bytes, str]) -> str:
         """stores the inputed data and returns the random key"""
         random_key = str(uuid.uuid4())
         self._redis.set(random_key, data)
