@@ -18,6 +18,21 @@ def count_calls(method: Callable) -> Callable:
     return wrapper
 
 
+def call_history(method: Callable) -> Callable:
+    """defined new decorator to explore lists"""
+    @wraps(method)
+    def wrapper(self, *args, **kwargs):
+        """wrapped another method again"""
+        inkey = "{}:inputs".format(method.__qualname__)
+        outkey = "{}:outputs".format(method.__qualname__)
+        A = str(args)
+        self._redis.rpush(inkey, A)
+        out = method(self, A, **kwargs)
+        self._redis.rpush(outkey, out)
+        return out
+    return wrapper
+
+
 class Cache():
     """created a class for storing an instance of redis as a client"""
     def __init__(self):
@@ -25,6 +40,7 @@ class Cache():
         self._redis.flushdb()
 
     @count_calls
+    @call_history
     def store(self, data: Union[str, bytes, int, float]) -> str:
         """stores the inputed data and returns the random key"""
         random_key = str(uuid.uuid4())
